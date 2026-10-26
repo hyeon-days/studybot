@@ -68,10 +68,16 @@ https://discord.com/oauth2/authorize?client_id=APP_ID&scope=bot+applications.com
 
 ### 2. 서버에서 실행하기
 
-Node.js 20.6 이상이 필요합니다. 봇은 24시간 켜져 있어야 하므로 Oracle Cloud 무료 인스턴스, 소형 VPS, 상시 켜 두는 PC 등에서 실행합니다.
+봇은 24시간 켜져 있어야 합니다. 무료로 띄우려면 [Oracle Cloud 무료 서버 가이드](docs/HOSTING.md)를 따르세요. Ubuntu 서버라면 아래 한 줄로 설치, 실행, 자동 재시작 등록까지 끝납니다.
 
 ```bash
-git clone <이 저장소 주소> study-bot && cd study-bot
+curl -fsSL https://raw.githubusercontent.com/hyeon-days/studybot/main/scripts/setup-server.sh | bash
+```
+
+직접 설치하려면 Node.js 20.6 이상에서 다음과 같이 실행합니다.
+
+```bash
+git clone https://github.com/hyeon-days/studybot.git && cd studybot
 npm ci
 cp .env.example .env   # DISCORD_TOKEN 입력
 npm run build
