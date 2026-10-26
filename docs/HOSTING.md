@@ -31,16 +31,34 @@
 
 ## 3. 서버 접속
 
-Windows는 PowerShell, macOS는 터미널에서 실행합니다. 경로와 IP는 본인 것으로 바꾸세요.
+Ubuntu는 2단계에서 만든 **Oracle 서버에 이미 깔려 있습니다.** 내 컴퓨터에는 아무것도 설치하지 않고, 내 컴퓨터에서 그 서버로 원격 접속만 합니다.
 
-```bash
-# macOS/Linux에서는 키 파일 권한을 먼저 좁혀야 합니다
-chmod 600 ~/Downloads/ssh-key-*.key
+### Windows (10, 11)
 
-ssh -i ~/Downloads/ssh-key-2026-10-27.key ubuntu@123.45.67.89
+시작 메뉴에서 'PowerShell'을 검색해 엽니다. `ssh` 명령은 Windows에 기본으로 들어 있습니다.
+
+처음 한 번만, 내려받은 키 파일을 나만 읽을 수 있게 권한을 좁힙니다. 이걸 안 하면 'UNPROTECTED PRIVATE KEY FILE' 오류가 납니다. 파일 이름은 본인 것으로 바꾸세요.
+
+```powershell
+cd ~\Downloads
+icacls .\ssh-key-2026-10-27.key /inheritance:r
+icacls .\ssh-key-2026-10-27.key /grant:r "$($env:USERNAME):(R)"
 ```
 
-Windows에서 'bad permissions' 오류가 나면 키 파일을 `C:\Users\본인이름\.ssh\` 폴더로 옮긴 뒤 다시 시도합니다.
+그다음 서버에 접속합니다. IP는 2단계에서 복사한 Public IP로 바꿉니다.
+
+```powershell
+ssh -i .\ssh-key-2026-10-27.key ubuntu@123.45.67.89
+```
+
+처음 접속할 때 'Are you sure you want to continue connecting'이 나오면 `yes`를 입력합니다. 프롬프트가 `ubuntu@...:~$`로 바뀌면 서버 안에 들어온 것입니다. 이후 명령은 모두 이 창에서 입력하며, 나갈 때는 `exit`를 입력합니다.
+
+### macOS, Linux
+
+```bash
+chmod 600 ~/Downloads/ssh-key-*.key
+ssh -i ~/Downloads/ssh-key-2026-10-27.key ubuntu@123.45.67.89
+```
 
 ## 4. 봇 설치
 
