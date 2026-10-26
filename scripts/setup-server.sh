@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Ubuntu 22.04/24.04 서버에서 study-bot을 설치(또는 업데이트)하고 pm2로 상시 실행한다.
 # 사용법: curl -fsSL https://raw.githubusercontent.com/hyeon-days/studybot/main/scripts/setup-server.sh | bash
+# DISCORD_TOKEN 환경변수를 주면 토큰을 묻지 않는다(cloud-init 자동 설치용).
 set -euo pipefail
 
 REPO_URL="${REPO_URL:-https://github.com/hyeon-days/studybot.git}"
@@ -18,11 +19,19 @@ if [ -z "$(swapon --show --noheadings)" ]; then
 fi
 
 echo "[2/5] Node.js, git, pm2 설치"
-sudo apt-get update -qq
-sudo apt-get install -y -qq git curl build-essential python3 >/dev/null
+# 서버 첫 부팅 직후에는 자동 업데이트가 apt를 잡고 있을 수 있어 끝날 때까지 기다린다.
+wait_apt() {
+  while sudo fuser /var/lib/dpkg/lock-frontend /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 5; done
+}
+APT="apt-get -o DPkg::Lock::Timeout=600"
+wait_apt
+sudo $APT update -qq
+sudo $APT install -y -qq git curl build-essential python3 >/dev/null
 if ! command -v node >/dev/null || [ "$(node -p 'process.versions.node.split(".")[0]')" -lt 22 ]; then
+  wait_apt
   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - >/dev/null
-  sudo apt-get install -y -qq nodejs >/dev/null
+  wait_apt
+  sudo $APT install -y -qq nodejs >/dev/null
 fi
 command -v pm2 >/dev/null || sudo npm install -g pm2 --silent
 
@@ -37,10 +46,13 @@ npm ci --no-audit --no-fund
 npm run build
 
 echo "[4/5] 봇 토큰 설정"
-if ! grep -qs '^DISCORD_TOKEN=..*' .env; then
-  # 파이프(curl | bash)로 실행해도 키보드 입력을 받도록 /dev/tty에서 읽는다.
-  read -rsp "디스코드 봇 토큰을 붙여넣고 Enter (화면에 표시되지 않음): " token </dev/tty
-  echo
+if [ -n "${DISCORD_TOKEN:-}" ] || ! grep -qs '^DISCORD_TOKEN=..*' .env; then
+  token="${DISCORD_TOKEN:-}"
+  if [ -z "$token" ]; then
+    # 파이프(curl | bash)로 실행해도 키보드 입력을 받도록 /dev/tty에서 읽는다.
+    read -rsp "디스코드 봇 토큰을 붙여넣고 Enter (화면에 표시되지 않음): " token </dev/tty
+    echo
+  fi
   printf 'DISCORD_TOKEN=%s\nDB_PATH=data/bot.sqlite\n' "$token" >.env
   chmod 600 .env
 fi

@@ -24,12 +24,19 @@
 3. **Shape:** Change shape에서 'Always Free-eligible' 표시가 있는 것을 고릅니다.
    - Ampere (VM.Standard.A1.Flex): 1 OCPU, 6GB 메모리면 충분합니다. 'Out of capacity' 오류가 나면 아래 AMD를 고르거나 시간을 두고 다시 시도합니다.
    - AMD (VM.Standard.E2.1.Micro): 메모리 1GB지만 이 봇에는 충분합니다. 설치 스크립트가 스왑을 자동으로 만들어 줍니다.
-4. **Add SSH keys:** 'Generate a key pair for me'를 고르고 **Save private key**로 키 파일(`.key`)을 꼭 내려받습니다. 이 파일이 없으면 서버에 접속할 수 없습니다.
-5. Create를 누르고, 상태가 RUNNING이 되면 Public IP address를 복사해 둡니다.
+4. **Add SSH keys:** 'Generate a key pair for me'를 고르고 **Save private key**로 키 파일(`.key`)을 내려받아 잘 보관합니다. 자동 설치가 잘 되면 쓸 일이 없지만, 문제가 생겼을 때 서버에 들어가려면 이 파일이 꼭 필요합니다.
+5. **봇 자동 설치 스크립트 붙여넣기:** 화면 아래쪽의 Show advanced options(고급 옵션)를 펼치고, Management 탭의 Initialization script(초기화 스크립트)에서 'Paste cloud-init script'를 고릅니다. 입력칸에 [`scripts/oracle-cloud-init.sh`](../scripts/oracle-cloud-init.sh)의 내용을 통째로 붙여 넣은 뒤, `여기에_봇_토큰을_붙여넣기` 부분만 본인 봇 토큰으로 바꿉니다. 따옴표는 지우지 마세요. Oracle 화면 구성은 가끔 바뀌니 메뉴 이름이 조금 달라도 'cloud-init' 또는 '초기화 스크립트' 칸을 찾으면 됩니다.
+6. Create를 누릅니다.
 
 봇은 디스코드로 나가는 연결만 쓰므로 방화벽(포트) 설정은 건드리지 않아도 됩니다.
 
-## 3. 서버 접속
+## 3. 확인
+
+서버 상태가 RUNNING이 되고 **5~15분쯤 지나면** 디스코드 멤버 목록에서 봇이 온라인(초록불)으로 바뀝니다. 그러면 설치가 끝난 것이고, 이 문서의 나머지는 건너뛰고 README의 '설치 직후 할 일'로 넘어가면 됩니다.
+
+20분이 지나도 봇이 오프라인이거나, 5번 단계를 빠뜨렸다면 아래처럼 서버에 직접 접속해 설치합니다.
+
+## 4. (자동 설치가 안 됐을 때) 서버 접속
 
 Ubuntu는 2단계에서 만든 **Oracle 서버에 이미 깔려 있습니다.** 내 컴퓨터에는 아무것도 설치하지 않고, 내 컴퓨터에서 그 서버로 원격 접속만 합니다.
 
@@ -60,7 +67,9 @@ chmod 600 ~/Downloads/ssh-key-*.key
 ssh -i ~/Downloads/ssh-key-2026-10-27.key ubuntu@123.45.67.89
 ```
 
-## 4. 봇 설치
+## 5. (자동 설치가 안 됐을 때) 봇 설치
+
+자동 설치를 시도했는데 봇이 켜지지 않았다면, 먼저 `cat /var/log/studybot-setup.log`로 진행 기록을 확인하세요. 마지막 몇 줄을 개발자에게 보내 주면 원인을 찾기 쉽습니다.
 
 접속한 서버에서 아래 한 줄을 실행합니다. 중간에 봇 토큰을 물어보면 붙여 넣고 Enter를 누릅니다(입력한 글자는 화면에 보이지 않습니다).
 
